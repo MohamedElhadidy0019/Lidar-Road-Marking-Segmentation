@@ -1,0 +1,501 @@
+(base) [kmohamed@loginnode Cylinder3D_spconv_v2]$ cat 168816Cylinder3D_job.out
+train_cylinder_asym_nuscenes.py
+Namespace(config_path='config/nuScenes.yaml')
+[480 360  32]
+======
+Loading NuScenes tables for version v1.0-trainval...
+Loading nuScenes-lidarseg...
+32 category,
+8 attribute,
+4 visibility,
+64386 instance,
+12 sensor,
+10200 calibrated_sensor,
+2631083 ego_pose,
+68 log,
+850 scene,
+34149 sample,
+2631083 sample_data,
+1166187 sample_annotation,
+4 map,
+34149 lidarseg,
+Done loading in 33.760 seconds.
+======
+Reverse indexing ...
+Done reverse indexing in 7.9 seconds.
+======
+Validation per class iou:
+barrier : 0.00%
+bicycle : 0.00%
+bus : 0.00%
+car : 0.00%
+construction_vehicle : 0.00%
+motorcycle : 0.00%
+pedestrian : 0.00%
+traffic_cone : 0.00%
+trailer : 0.00%
+truck : 0.00%
+driveable_surface : 0.00%
+other_flat : 0.00%
+sidewalk : 0.00%
+terrain : 0.00%
+manmade : 0.00%
+vegetation : 14.61%
+Current val miou is 0.913 while the best val miou is 0.913
+Current val loss is 3.770
+epoch 0 iter     0, loss: 3.854
+
+epoch 0 iter  1000, loss: 1.611
+
+epoch 0 iter  2000, loss: 1.456
+
+epoch 0 iter  3000, loss: 1.372
+
+epoch 0 iter  4000, loss: 1.314
+
+epoch 0 iter  4598, loss: 1.286
+
+Validation per class iou:
+barrier : 52.77%
+bicycle : 1.91%
+bus : 12.32%
+car : 71.90%
+construction_vehicle : 0.87%
+motorcycle : 13.37%
+pedestrian : 39.94%
+traffic_cone : 25.51%
+trailer : 3.90%
+truck : 39.02%
+driveable_surface : 88.99%
+other_flat : 17.47%
+sidewalk : 42.93%
+terrain : 60.82%
+manmade : 74.03%
+vegetation : 78.54%
+Current val miou is 39.017 while the best val miou is 39.017
+Current val loss is 1.090
+epoch 0 iter  5000, loss: 1.270
+
+epoch 0 iter  6000, loss: 1.233
+
+epoch 0 iter  7000, loss: 1.204
+
+epoch 0 iter  8000, loss: 1.178
+
+epoch 0 iter  9000, loss: 1.157
+
+epoch 0 iter  9197, loss: 1.152
+
+Validation per class iou:
+barrier : 51.83%
+bicycle : 3.09%
+bus : 37.20%
+car : 76.28%
+construction_vehicle : 0.29%
+motorcycle : 9.72%
+pedestrian : 46.38%
+traffic_cone : 25.38%
+trailer : 11.14%
+truck : 48.76%
+driveable_surface : 92.69%
+other_flat : 45.81%
+sidewalk : 57.21%
+terrain : 61.99%
+manmade : 78.95%
+vegetation : 74.79%
+Current val miou is 45.094 while the best val miou is 45.094
+Current val loss is 0.963
+epoch 0 iter 10000, loss: 1.137
+
+epoch 0 iter 11000, loss: 1.118
+
+epoch 0 iter 12000, loss: 1.102
+
+epoch 0 iter 13000, loss: 1.088
+
+epoch 0 iter 13796, loss: 1.077
+
+Validation per class iou:
+barrier : 55.22%
+bicycle : 6.91%
+bus : 32.71%
+car : 77.88%
+construction_vehicle : 3.49%
+motorcycle : 14.46%
+pedestrian : 57.81%
+traffic_cone : 39.58%
+trailer : 20.85%
+truck : 53.01%
+driveable_surface : 93.43%
+other_flat : 45.70%
+sidewalk : 59.95%
+terrain : 62.89%
+manmade : 81.54%
+vegetation : 81.73%
+Current val miou is 49.197 while the best val miou is 49.197
+Current val loss is 0.886
+epoch 0 iter 14000, loss: 1.074
+
+epoch 1 iter   935, loss: 0.875
+
+epoch 1 iter  1935, loss: 0.875
+
+epoch 1 iter  2935, loss: 0.872
+
+epoch 1 iter  3935, loss: 0.866
+
+epoch 1 iter  4330, loss: 0.865
+
+Validation per class iou:
+barrier : 59.18%
+bicycle : 6.88%
+bus : 48.73%
+car : 81.90%
+construction_vehicle : 8.68%
+motorcycle : 29.04%
+pedestrian : 58.92%
+traffic_cone : 34.83%
+trailer : 16.89%
+truck : 59.21%
+driveable_surface : 93.82%
+other_flat : 51.71%
+sidewalk : 61.29%
+terrain : 66.53%
+manmade : 82.33%
+vegetation : 81.85%
+Current val miou is 52.612 while the best val miou is 52.612
+Current val loss is 0.836
+epoch 1 iter  4935, loss: 0.863
+
+epoch 1 iter  5935, loss: 0.859
+
+epoch 1 iter  6935, loss: 0.855
+
+epoch 1 iter  7935, loss: 0.850
+
+epoch 1 iter  8929, loss: 0.847
+
+Validation per class iou:
+barrier : 62.54%
+bicycle : 8.26%
+bus : 37.30%
+car : 82.13%
+construction_vehicle : 7.73%
+motorcycle : 38.36%
+pedestrian : 59.07%
+traffic_cone : 36.65%
+trailer : 25.27%
+truck : 55.46%
+driveable_surface : 94.24%
+other_flat : 57.76%
+sidewalk : 62.30%
+terrain : 67.46%
+manmade : 80.45%
+vegetation : 80.47%
+Current val miou is 53.466 while the best val miou is 53.466
+Current val loss is 0.848
+epoch 1 iter  8935, loss: 0.847
+
+epoch 1 iter  9935, loss: 0.844
+
+epoch 1 iter 10935, loss: 0.840
+
+epoch 1 iter 11935, loss: 0.836
+
+epoch 1 iter 12935, loss: 0.832
+
+epoch 1 iter 13528, loss: 0.830
+
+Validation per class iou:
+barrier : 63.00%
+bicycle : 7.90%
+bus : 56.63%
+car : 76.41%
+construction_vehicle : 8.23%
+motorcycle : 28.54%
+pedestrian : 57.77%
+traffic_cone : 33.22%
+trailer : 32.17%
+truck : 55.08%
+driveable_surface : 94.04%
+other_flat : 58.00%
+sidewalk : 63.63%
+terrain : 67.75%
+manmade : 82.95%
+vegetation : 82.47%
+Current val miou is 54.237 while the best val miou is 54.237
+Current val loss is 0.808
+epoch 1 iter 13935, loss: 0.829
+
+epoch 2 iter   870, loss: 0.765
+
+epoch 2 iter  1870, loss: 0.773
+
+epoch 2 iter  2870, loss: 0.771
+
+epoch 2 iter  3870, loss: 0.771
+
+epoch 2 iter  4062, loss: 0.770
+
+Validation per class iou:
+barrier : 64.08%
+bicycle : 9.47%
+bus : 66.53%
+car : 82.74%
+construction_vehicle : 12.12%
+motorcycle : 47.37%
+pedestrian : 62.89%
+traffic_cone : 30.50%
+trailer : 15.49%
+truck : 65.85%
+driveable_surface : 94.62%
+other_flat : 47.46%
+sidewalk : 65.99%
+terrain : 67.49%
+manmade : 84.07%
+vegetation : 83.37%
+Current val miou is 56.254 while the best val miou is 56.254
+Current val loss is 0.781
+epoch 2 iter  4870, loss: 0.768
+
+epoch 2 iter  5870, loss: 0.766
+
+epoch 2 iter  6870, loss: 0.764
+
+epoch 2 iter  7870, loss: 0.762
+
+epoch 2 iter  8661, loss: 0.759
+
+Validation per class iou:
+barrier : 66.25%
+bicycle : 10.08%
+bus : 63.63%
+car : 83.44%
+construction_vehicle : 13.09%
+motorcycle : 45.43%
+pedestrian : 67.09%
+traffic_cone : 42.02%
+trailer : 34.39%
+truck : 66.28%
+driveable_surface : 95.22%
+other_flat : 61.36%
+sidewalk : 68.02%
+terrain : 70.25%
+manmade : 84.27%
+vegetation : 83.37%
+Current val miou is 59.637 while the best val miou is 59.637
+Current val loss is 0.755
+epoch 2 iter  8870, loss: 0.759
+
+epoch 2 iter  9870, loss: 0.757
+
+epoch 2 iter 10870, loss: 0.755
+
+epoch 2 iter 11870, loss: 0.754
+
+epoch 2 iter 12870, loss: 0.752
+
+epoch 2 iter 13260, loss: 0.751
+
+Validation per class iou:
+barrier : 66.82%
+bicycle : 12.11%
+bus : 70.74%
+car : 83.62%
+construction_vehicle : 15.27%
+motorcycle : 49.12%
+pedestrian : 66.06%
+traffic_cone : 37.72%
+trailer : 41.25%
+truck : 65.76%
+driveable_surface : 94.92%
+other_flat : 58.94%
+sidewalk : 66.97%
+terrain : 68.82%
+manmade : 84.53%
+vegetation : 83.96%
+Current val miou is 60.413 while the best val miou is 60.413
+Current val loss is 0.761
+epoch 2 iter 13870, loss: 0.751
+
+epoch 3 iter   805, loss: 0.708
+
+epoch 3 iter  1805, loss: 0.712
+
+epoch 3 iter  2805, loss: 0.711
+
+epoch 3 iter  3794, loss: 0.710
+
+Validation per class iou:
+barrier : 65.10%
+bicycle : 11.66%
+bus : 72.64%
+car : 84.70%
+construction_vehicle : 16.05%
+motorcycle : 54.09%
+pedestrian : 63.73%
+traffic_cone : 42.66%
+trailer : 37.15%
+truck : 69.27%
+driveable_surface : 95.40%
+other_flat : 58.78%
+sidewalk : 68.61%
+terrain : 70.76%
+manmade : 84.90%
+vegetation : 84.13%
+Current val miou is 61.226 while the best val miou is 61.226
+Current val loss is 0.732
+epoch 3 iter  3805, loss: 0.710
+
+epoch 3 iter  4805, loss: 0.709
+
+epoch 3 iter  5805, loss: 0.710
+
+epoch 3 iter  6805, loss: 0.711
+
+epoch 3 iter  7805, loss: 0.709
+
+epoch 3 iter  8393, loss: 0.709
+
+Validation per class iou:
+barrier : 65.89%
+bicycle : 16.57%
+bus : 70.83%
+car : 84.63%
+construction_vehicle : 16.67%
+motorcycle : 42.17%
+pedestrian : 64.77%
+traffic_cone : 43.45%
+trailer : 38.22%
+truck : 67.89%
+driveable_surface : 95.42%
+other_flat : 62.14%
+sidewalk : 69.30%
+terrain : 70.56%
+manmade : 84.78%
+vegetation : 84.04%
+Current val miou is 61.084 while the best val miou is 61.226
+Current val loss is 0.725
+epoch 3 iter  8805, loss: 0.708
+
+epoch 3 iter  9805, loss: 0.707
+
+epoch 3 iter 10805, loss: 0.707
+
+epoch 3 iter 11805, loss: 0.706
+
+epoch 3 iter 12805, loss: 0.705
+
+epoch 3 iter 12992, loss: 0.705
+
+Validation per class iou:
+barrier : 65.08%
+bicycle : 8.68%
+bus : 67.28%
+car : 80.62%
+construction_vehicle : 18.01%
+motorcycle : 45.93%
+pedestrian : 68.81%
+traffic_cone : 39.71%
+trailer : 38.29%
+truck : 65.21%
+driveable_surface : 95.32%
+other_flat : 64.39%
+sidewalk : 69.39%
+terrain : 71.57%
+manmade : 85.10%
+vegetation : 84.65%
+Current val miou is 60.502 while the best val miou is 61.226
+Current val loss is 0.721
+epoch 3 iter 13805, loss: 0.704
+
+epoch 4 iter   740, loss: 0.675
+
+epoch 4 iter  1740, loss: 0.676
+
+epoch 4 iter  2740, loss: 0.679
+
+epoch 4 iter  3526, loss: 0.681
+
+Validation per class iou:
+barrier : 67.81%
+bicycle : 17.37%
+bus : 67.07%
+car : 83.97%
+construction_vehicle : 16.24%
+motorcycle : 42.86%
+pedestrian : 68.85%
+traffic_cone : 38.83%
+trailer : 36.75%
+truck : 58.90%
+driveable_surface : 95.58%
+other_flat : 61.78%
+sidewalk : 69.81%
+terrain : 71.77%
+manmade : 85.15%
+vegetation : 84.59%
+Current val miou is 60.459 while the best val miou is 61.226
+Current val loss is 0.720
+epoch 4 iter  3740, loss: 0.679
+
+epoch 4 iter  4740, loss: 0.679
+
+epoch 4 iter  5740, loss: 0.678
+
+epoch 4 iter  6740, loss: 0.677
+
+epoch 4 iter  7740, loss: 0.677
+
+epoch 4 iter  8125, loss: 0.677
+
+Validation per class iou:
+barrier : 67.15%
+bicycle : 16.09%
+bus : 66.55%
+car : 85.06%
+construction_vehicle : 20.51%
+motorcycle : 41.20%
+pedestrian : 69.51%
+traffic_cone : 38.69%
+trailer : 22.85%
+truck : 58.46%
+driveable_surface : 95.47%
+other_flat : 63.33%
+sidewalk : 69.55%
+terrain : 72.13%
+manmade : 84.82%
+vegetation : 84.77%
+Current val miou is 59.758 while the best val miou is 61.226
+Current val loss is 0.717
+epoch 4 iter  8740, loss: 0.677
+
+epoch 4 iter  9740, loss: 0.675
+
+epoch 4 iter 10740, loss: 0.674
+
+epoch 4 iter 11740, loss: 0.674
+
+epoch 4 iter 12724, loss: 0.673
+
+Validation per class iou:
+barrier : 64.69%
+bicycle : 15.07%
+bus : 62.92%
+car : 84.72%
+construction_vehicle : 23.30%
+motorcycle : 36.22%
+pedestrian : 66.40%
+traffic_cone : 41.51%
+trailer : 37.45%
+truck : 69.29%
+driveable_surface : 95.71%
+other_flat : 64.00%
+sidewalk : 70.74%
+terrain : 72.72%
+manmade : 85.04%
+vegetation : 84.79%
+Current val miou is 60.911 while the best val miou is 61.226
+Current val loss is 0.702
+epoch 4 iter 12740, loss: 0.673
+
+epoch 4 iter 13740, loss: 0.672
