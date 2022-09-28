@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from matplotlib.pyplot import annotate
 import numpy as np
 from torch.utils import data
 import yaml
@@ -45,26 +46,30 @@ def polar2cat(input_xyz_polar):
 
 
 
-def preprocess_pointcloud(data):
-    xyz=data[:, :3]
-
-
+def preprocess_pointcloud(data_tuple):
+    grid_size=np.array([480,360,2])
+    ignore_label=0
+    data_pt_cloud,sig=data_tuple
+    sig=sig.reshape(sig.shape[0],)
+    #sig=data_pt_cloud[:, :3]
+    xyz=data_pt_cloud[:, :3]
     xyz_pol = cart2polar(xyz)
-
     max_bound_r = np.percentile(xyz_pol[:, 0], 100, axis=0)
     min_bound_r = np.percentile(xyz_pol[:, 0], 0, axis=0)
     max_bound = np.max(xyz_pol[:, 1:], axis=0)
     min_bound = np.min(xyz_pol[:, 1:], axis=0)
     max_bound = np.concatenate(([max_bound_r], max_bound))
     min_bound = np.concatenate(([min_bound_r], min_bound))
+
+    max_bound=np.array([50. , 3.1415926, 3.])
+    min_bound=np.array([0. , -3.1415926, -5.])
+
     # get grid index
-    grid_size=[480, 360, 32]
-    grid_size=np.array(grid_size)
     crop_range = max_bound - min_bound
     cur_grid_size = grid_size
     intervals = crop_range / (cur_grid_size - 1)
 
-    if (intervals == 0).any(): print("Zero interval!")
+
     grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
 
     voxel_position = np.zeros(grid_size, dtype=np.float32)
@@ -74,22 +79,26 @@ def preprocess_pointcloud(data):
     voxel_position = polar2cat(voxel_position)
 
 
-    # # process labels
-    # processed_label = np.ones(grid_size, dtype=np.uint8) * self.ignore_label
+        # process labels
+    # processed_label = np.ones(grid_size, dtype=np.uint8) * ignore_label
     # label_voxel_pair = np.concatenate([grid_ind, labels], axis=1)
     # label_voxel_pair = label_voxel_pair[np.lexsort((grid_ind[:, 0], grid_ind[:, 1], grid_ind[:, 2])), :]
     # processed_label = nb_process_label(np.copy(processed_label), label_voxel_pair)
-    # data_tuple = (voxel_position, processed_label)
+    data_tuple = (voxel_position, )
 
     # center data on each voxel for PTnet
     voxel_centers = (grid_ind.astype(np.float32) + 0.5) * intervals + min_bound
     return_xyz = xyz_pol - voxel_centers
     return_xyz = np.concatenate((return_xyz, xyz_pol, xyz[:, :2]), axis=1)
 
-
-    return_fea = return_xyz
+    return_fea = np.concatenate((return_xyz, sig[..., np.newaxis]), axis=1)
 
     return return_fea,grid_ind
+
+
+
+
+
 
     pass
 
@@ -157,6 +166,10 @@ def main(args):
     num_class = model_config['num_class']
     ignore_label = dataset_config['ignore_label']
 
+    with open(dataset_config["label_mapping"], 'r') as stream:
+        nuscenesyaml = yaml.safe_load(stream)
+    learning_map = nuscenesyaml['learning_map']
+
     model_load_path = train_hypers['model_load_path']
     model_save_path = train_hypers['model_save_path']
 
@@ -171,18 +184,20 @@ def main(args):
                                                    num_class=num_class, ignore_label=ignore_label)
 
 
-
+    counter=0
     for it in sorted(POINTS_DIR.iterdir()):
         points_file = POINTS_DIR / (str(it.stem) + '.bin')
         print(str(points_file))
         raw_data = np.fromfile(points_file, dtype=np.float32).reshape((-1, 5))
+        points_label = np.expand_dims(np.zeros_like(raw_data[:, 0], dtype=int), axis=1)
+        data_tuple = (raw_data[:, :3], points_label.astype(np.uint8),raw_data[:, 3:5])
         print(raw_data.shape)
-        val_pt_fea,val_grid=preprocess_pointcloud(raw_data)
+        val_pt_fea,val_grid=preprocess_pointcloud(data_tuple)
         #print("SHAPES=", np.array(val_pt_fea).shape," , ",np.array(val_grid).shape)
         val_pt_fea=np.reshape(val_pt_fea,(1,val_pt_fea.shape[0],val_pt_fea.shape[1]))
         val_grid=np.reshape(val_grid,(1,val_grid.shape[0],val_grid.shape[1]))
 
-        print("SHAPES= ",val_pt_fea.shape, " , ", val_grid.shape)
+        #print("SHAPES= ",val_pt_fea.shape, " , ", val_grid.shape)
 
         val_pt_fea_ten = [torch.from_numpy(i).type(torch.FloatTensor).to(pytorch_device) for i in
                                           val_pt_fea]
@@ -190,8 +205,18 @@ def main(args):
 
 
         predict_labels = my_model(val_pt_fea_ten, val_grid_ten, 1)
+        predict_labels = torch.argmax(predict_labels, dim=1)
+        predict_labels = predict_labels.cpu().detach().numpy()
+        for count, i_val_grid in enumerate(val_grid):
+            inv_labels = np.vectorize(learning_map.__getitem__)(predict_labels[count, val_grid[count][:, 0], val_grid[count][:, 1], val_grid[count][:, 2]])
+            inv_labels = inv_labels.astype('uint32')
+            output_path='demosave/'
+            outputPath = output_path + str(counter).zfill(6) + '.label'
+            inv_labels.tofile(outputPath)
+            print("save " + outputPath)
+            #print("\n\n BIN_NAME: ", bin_name, "\n\n")
+        counter+=1
 
-        print('---------------------')
 
 
 
