@@ -9,8 +9,12 @@ colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [255, 0, 255], [
 
 
 def get_rgb_list(_label):
-    c = color_dict[_label]
-    return np.array((c[2], c[1], c[0]))
+    try:
+        c = color_dict[_label]
+    except:
+        c=[0,0,0]
+
+    return np.array((c[0], c[1], c[2]))
 
 
 def draw_pc(pc_xyzrgb):
@@ -47,16 +51,12 @@ def concate_color(_points, _label):
 ################################______MAIN______################################
 
 
-# points_dir = Path('/home/ou/Documents/dataset/my_pvrcnn_dataset(gazebo)/kitti/object/training/velodyne') # path to .bin data
-# label_dir = Path('/home/ou/workspace/code/Cylinder3D-master/my_result') # path to .label data
 points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/demo_lidar_input/') # path to .bin data
 label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/demosave/') # path to .label data
+# points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/inference_cluster/lidar_pc_val/') # path to .label data
+# label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/inference_cluster/lidar_labels/') # path to .bin data
 
 label_filter = [40, 48, 70, 72]    # object's label which you wan't to show
-# label_filter = []
-# with open('/home/ou/workspace/code/Cylinder3D-master/config/label_mapping/semantic-kitti.yaml', 'r') as stream: # label_mapping configuration file
-#     label_mapping = yaml.safe_load(stream)
-#     color_dict = label_mapping['color_map']
 with open('/home/mnabail/repos/Cylinder3D_spconv_v2/config/label_mapping/nuscenes.yaml', 'r') as stream: # label_mapping configuration file
     label_mapping = yaml.safe_load(stream)
     color_dict = label_mapping['color_map']
