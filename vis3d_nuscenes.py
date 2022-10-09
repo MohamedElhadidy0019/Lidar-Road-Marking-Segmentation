@@ -9,10 +9,9 @@ colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [255, 0, 255], [
 
 
 def get_rgb_list(_label):
-    try:
-        c = color_dict[_label]
-    except:
-        c=[0,0,0]
+
+    c = color_dict[_label]
+
 
     return np.array((c[0], c[1], c[2]))
 
@@ -39,11 +38,14 @@ def draw_pc(pc_xyzrgb):
 def concate_color(_points, _label):
     color = np.zeros((_points.shape[0], 3))
     label_id = np.unique(_label)
+    # print(label_id)
+    # print('---------------------------------------------')
+    pass
     for cls in label_id:
         if label_filter.__len__() == 0:
             color[_label == cls] = get_rgb_list(cls)
         elif label_filter.count(cls) == 0:
-            color[_label == cls] = get_rgb_list(cls)
+            color[_label == cls] = get_rgb_list(cls) # kol el 7agat ely leha el label bta3 l unique label cls , ta5d el loon bta3ha
     _points = np.concatenate([_points, color], axis=1)
     return _points
 
@@ -83,8 +85,9 @@ for it in sorted(label_dir.iterdir()):
     points_file = points_dir / (str(it.stem) + '.bin')
     label = np.fromfile(label_file, dtype=np.uint32)
     points = np.fromfile(points_file, dtype=np.float32).reshape((-1, 5))[:, 0:3]
-    print(points.shape)
-    print(label.shape, points.shape)
+    #print(points.shape)
+    #print(label.shape, points.shape)
     colorful_points = concate_color(points, label)
     draw_pc(colorful_points)
-    print("=============================================================================")
+    #print("=============================================================================")
+    #break

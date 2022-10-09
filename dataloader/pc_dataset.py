@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
 # author: Xinge
-# @file: pc_dataset.py 
+# @file: pc_dataset.py
+
+#? this file has nusecenes datasetloader that returns it as pointcloud
+
 
 import os
 import numpy as np
@@ -25,6 +28,7 @@ def get_pc_model_class(name):
     assert name in REGISTERED_PC_DATASET_CLASSES, f"available class: {REGISTERED_PC_DATASET_CLASSES}"
     return REGISTERED_PC_DATASET_CLASSES[name]
 
+#? this is the dataset calss for semikitti demo
 @register_dataset
 class SemKITTI_demo(data.Dataset):
     def __init__(self, data_path, imageset='demo',
@@ -38,7 +42,7 @@ class SemKITTI_demo(data.Dataset):
         self.im_idx = []
         self.im_idx += absoluteFilePaths(data_path)
         self.label_idx = []
-        if self.imageset == 'val':
+        if self.imageset == 'val': #! not needed by me
             print(demo_label_path)
             self.label_idx += absoluteFilePaths(demo_label_path)
 
@@ -48,7 +52,7 @@ class SemKITTI_demo(data.Dataset):
 
     def __getitem__(self, index):
         raw_data = np.fromfile(self.im_idx[index], dtype=np.float32).reshape((-1, 4))
-        if self.imageset == 'demo':
+        if self.imageset == 'demo': #! enters here
             annotated_data = np.expand_dims(np.zeros_like(raw_data[:, 0], dtype=int), axis=1)
         elif self.imageset == 'val':
             annotated_data = np.fromfile(self.label_idx[index], dtype=np.uint32).reshape((-1, 1))
@@ -56,7 +60,7 @@ class SemKITTI_demo(data.Dataset):
             annotated_data = np.vectorize(self.learning_map.__getitem__)(annotated_data)
 
         data_tuple = (raw_data[:, :3], annotated_data.astype(np.uint8))
-        if self.return_ref:
+        if self.return_ref:  #! enters here
             data_tuple += (raw_data[:, 3],)
         return data_tuple
 
@@ -102,8 +106,14 @@ class SemKITTI_sk(data.Dataset):
         return data_tuple
 
 
+#! IMPORTANT
 @register_dataset
-class SemKITTI_nusc(data.Dataset):
+class SemKITTI_nusc(data.Dataset):    #! called for nuscenes dataset
+    '''
+    Descirption :
+    it returns the pointcloud in points
+    then there's another class that takes the poincloud and voxelises it
+    '''
     def __init__(self, data_path, imageset='train',
                  return_ref=False, label_mapping="nuscenes.yaml", nusc=None):
         self.return_ref = return_ref
@@ -123,19 +133,51 @@ class SemKITTI_nusc(data.Dataset):
         'Denotes the total number of samples'
         return len(self.nusc_infos)
 
+@register_dataset
+class SemKITTI_nusc_demo(data.Dataset):    #! called for nuscenes dataset
+    '''
+    Descirption :
+    it returns the pointcloud in points
+    then there's another class that takes the poincloud and voxelises it
+    '''
+    def __init__(self, data_path, imageset='demo',
+                 return_ref=True, label_mapping="nuscenes.yaml", nusc=None):
+        self.return_ref = return_ref
+
+
+
+        with open(label_mapping, 'r') as stream:
+            nuscenesyaml = yaml.safe_load(stream)
+        self.learning_map = nuscenesyaml['learning_map']
+        self.imageset = imageset
+        self.return_ref = return_ref
+
+        self.im_idx = []
+        self.im_idx += absoluteFilePaths(data_path)
+
+        self.data_path = data_path
+        self.nusc = nusc
+
+    def __len__(self):
+        'Denotes the total number of samples'
+        return len(self.im_idx)
+
+
+    #? this returns the data as point cloud not voxels(not-confirmed)
     def __getitem__(self, index):
-        info = self.nusc_infos[index]
-        lidar_path = info['lidar_path'][16:]
-        lidar_sd_token = self.nusc.get('sample', info['token'])['data']['LIDAR_TOP']
-        lidarseg_labels_filename = os.path.join(self.nusc.dataroot,
-                                                self.nusc.get('lidarseg', lidar_sd_token)['filename'])
+        #info = self.nusc_infos[index]
+        #l0idar_path = info['lidar_path'][16:]
+        #lidar_sd_token = self.nusc.get('sample', info['token'])['data']['LIDAR_TOP']
+        #lidarseg_labels_filename = os.path.join(self.nusc.dataroot,
+        #                                       self.nusc.get('lidarseg', lidar_sd_token)['filename'])
 
-        points_label = np.fromfile(lidarseg_labels_filename, dtype=np.uint8).reshape([-1, 1])
-        points_label = np.vectorize(self.learning_map.__getitem__)(points_label)
-        points = np.fromfile(os.path.join(self.data_path, lidar_path), dtype=np.float32, count=-1).reshape([-1, 5])
+        #points_label = np.fromfile(lidarseg_labels_filename, dtype=np.uint8).reshape([-1, 1])
+        #points_label = np.vectorize(self.learning_map.__getitem__)(points_label)
 
+        points = np.fromfile(self.im_idx[index], dtype=np.float32, count=-1).reshape([-1, 5])
+        points_label = np.expand_dims(np.zeros_like(points[:, 0], dtype=int), axis=1)
         data_tuple = (points[:, :3], points_label.astype(np.uint8))
-        if self.return_ref:
+        if self.return_ref: #! enters it
             data_tuple += (points[:, 3],)
         return data_tuple
 

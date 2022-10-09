@@ -100,7 +100,8 @@ def main(args):
                         for count, i_val_grid in enumerate(val_grid):
                             hist_list.append(fast_hist_crop(predict_labels[
                                                                 count, val_grid[count][:, 0], val_grid[count][:, 1],
-                                                                val_grid[count][:, 2]], val_pt_labs[count],
+                                                                val_grid[count][:, 2]],
+                                                                val_pt_labs[count],
                                                             unique_label))
                         val_loss_list.append(loss.detach().cpu().numpy())
                 my_model.train()
