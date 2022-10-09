@@ -100,7 +100,7 @@ def main(args):
     demo_dataset_loader = build_dataset(dataset_config, data_dir, grid_size=grid_size, demo_label_dir=demo_label_dir)
     with open(dataset_config["label_mapping"], 'r') as stream:
         nuscenesyaml = yaml.safe_load(stream)
-    learning_map = nuscenesyaml['learning_map_inv']
+    learning_map = nuscenesyaml['learning_map_16_label_inference']
 
 
     my_model.eval()
@@ -123,6 +123,7 @@ def main(args):
             predict_labels = predict_labels.cpu().detach().numpy()
             for count, i_demo_grid in enumerate(demo_grid):
                 labels = np.vectorize(learning_map.__getitem__)(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]])
+                #labels = np.vectorize(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]])
                 labels = labels.astype('uint32')
                 outputPath = save_dir + str(i_iter_demo).zfill(6) + '.label'
                 labels.tofile(outputPath)
