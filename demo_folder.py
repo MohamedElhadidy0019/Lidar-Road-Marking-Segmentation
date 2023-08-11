@@ -26,8 +26,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def build_dataset(dataset_config,
-                  data_dir,
+def build_dataset(dataset_config, # config is just the dict from yaml
+                  data_dir,      # path to folder having lidar scans
                   grid_size=[480, 360, 32],
                   demo_label_dir=None):
 
@@ -39,10 +39,13 @@ def build_dataset(dataset_config,
 
     SemKITTI_demo = get_pc_model_class('SemKITTI_demo')
 
+    #? loads the dataset in pointcloud points form
     demo_pt_dataset = SemKITTI_demo(data_dir, imageset=imageset,
                               return_ref=True, label_mapping=label_mapping, demo_label_path=demo_label_dir)
 
-    demo_dataset = get_model_class(dataset_config['dataset_type'])(
+    #? we want this to call the cylinder_dataset_nuscenes function
+    #? it calls class cylinder_dataset(data.Dataset)
+    demo_dataset = get_model_class(dataset_config['dataset_type'])( #! calls dataset_smentickitti.cylinder_dataset
         demo_pt_dataset,
         grid_size=grid_size,
         fixed_volume_space=dataset_config['fixed_volume_space'],
@@ -98,9 +101,12 @@ def main(args):
     my_model.eval()
     hist_list = []
     demo_loss_list = []
+
+
     with torch.no_grad():
-        for i_iter_demo, (_, demo_vox_label, demo_grid, demo_pt_labs, demo_pt_fea) in enumerate(
-                demo_dataset_loader):
+        for i_iter_demo, temp_tuple in tqdm(enumerate(demo_dataset_loader)):
+
+            (_, demo_vox_label, demo_grid, demo_pt_labs, demo_pt_fea)= temp_tuple
             demo_pt_fea_ten = [torch.from_numpy(i).type(torch.FloatTensor).to(pytorch_device) for i in
                               demo_pt_fea]
             demo_grid_ten = [torch.from_numpy(i).to(pytorch_device) for i in demo_grid]
@@ -116,11 +122,12 @@ def main(args):
                                                     count, demo_grid[count][:, 0], demo_grid[count][:, 1],
                                                     demo_grid[count][:, 2]], demo_pt_labs[count],
                                                 unique_label))
-                inv_labels = np.vectorize(inv_learning_map.__getitem__)(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]]) 
+                inv_labels = np.vectorize(inv_learning_map.__getitem__)(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]])
                 inv_labels = inv_labels.astype('uint32')
                 outputPath = save_dir + str(i_iter_demo).zfill(6) + '.label'
                 inv_labels.tofile(outputPath)
                 print("save " + outputPath)
+                #print("\n\n BIN_NAME: ", bin_name, "\n\n")
             demo_loss_list.append(loss.detach().cpu().numpy())
 
     if demo_label_dir != '':
@@ -138,14 +145,21 @@ def main(args):
               (np.mean(demo_loss_list)))
 
 if __name__ == '__main__':
+    print(sys.argv[1:])
     # Training settings
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-y', '--config_path', default='config/semantickitti.yaml')
-    parser.add_argument('--demo-folder', type=str, default='', help='path to the folder containing demo lidar scans', required=True)
-    parser.add_argument('--save-folder', type=str, default='', help='path to save your result', required=True)
+    parser.add_argument('--demo-folder', type=str, default='demo_lidar_input_kitti/',
+                        help='path to the folder containing demo lidar scans',
+                        required=False)
+    parser.add_argument('--save-folder', type=str, default = 'demo_save_kitti/',
+                            help='path to save your result',
+                            required=False)
     parser.add_argument('--demo-label-folder', type=str, default='', help='path to the folder containing demo labels')
     args = parser.parse_args()
 
     print(' '.join(sys.argv))
     print(args)
     main(args)
+
+    #python demo_folder.py --demo-folder demofolder/sweeps/LIDAR_TOP/ --save-folder demosave/

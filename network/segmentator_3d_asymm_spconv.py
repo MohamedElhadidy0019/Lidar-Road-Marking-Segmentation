@@ -4,6 +4,12 @@
 
 # updated to Spconv-V2 by github@min2209
 
+
+
+#? This file is for generating the whole encoder-decoder network
+
+
+
 import numpy as np
 #import spconv
 import spconv.pytorch as spconv
@@ -52,7 +58,7 @@ class ResContextBlock(nn.Module):
         self.conv1 = conv1x3(in_filters, out_filters, indice_key=indice_key + "bef1")
         self.bn0 = nn.BatchNorm1d(out_filters)
         self.act1 = nn.LeakyReLU()
-          
+
         self.conv1_2 = conv3x1(out_filters, out_filters, indice_key=indice_key + "bef2")
         # self.conv1_2 = conv1x3(out_filters, out_filters, indice_key=indice_key + "bef")
 
@@ -290,6 +296,13 @@ class Asymm_3d_spconv(nn.Module):
                                         bias=True)
 
     def forward(self, voxel_features, coors, batch_size):
+        '''
+        Parameters
+        ----------
+        voxel_features: the output of the mlp that extracts point-wise features
+        coors: the coordinates of the voxels having the extracted features
+        batch_size: the number of samples in each batch
+        '''
         # x = x.contiguous()
         coors = coors.int()
         # import pdb

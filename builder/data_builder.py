@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 # author: Xinge
-# @file: data_builder.py 
+# @file: data_builder.py
 
 import torch
 from dataloader.dataset_semantickitti import get_model_class, collate_fn_BEV
@@ -24,13 +24,13 @@ def build(dataset_config,
     nusc=None
     if "nusc" in dataset_config['pc_dataset_type']:
         from nuscenes import NuScenes
-        nusc = NuScenes(version='v1.0-trainval', dataroot=data_path, verbose=True)
+        nusc = NuScenes(version='v1.0-mini', dataroot=data_path, verbose=True)
 
-    train_pt_dataset = SemKITTI(data_path, imageset=train_imageset,
+    train_pt_dataset = SemKITTI(data_path, imageset=train_imageset,  #! SemKITTI is 'pc_dataset.SemKITTI_nusc' , this dataset has the point cloud in point form
                                 return_ref=train_ref, label_mapping=label_mapping, nusc=nusc)
     val_pt_dataset = SemKITTI(data_path, imageset=val_imageset,
                               return_ref=val_ref, label_mapping=label_mapping, nusc=nusc)
-
+    #! this function is 'dataset_nuscenes.cylinder_dataset_nuscenes()' function, it returns the data in voxel form
     train_dataset = get_model_class(dataset_config['dataset_type'])(
         train_pt_dataset,
         grid_size=grid_size,

@@ -49,13 +49,13 @@ def concate_color(_points, _label):
 ################################______MAIN______################################
 
 
-points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/demo_lidar_input/') # path to .bin data
-label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/demosave/') # path to .label data
+points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/demo_lidar_input/') # path to .bin data
+label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/demosave/') # path to .label data
 # points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/inference_cluster/lidar_pc_val/') # path to .label data
 # label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/inference_cluster/lidar_labels/') # path to .bin data
 
 label_filter = [40, 48, 70, 72]    # object's label which you wan't to show
-with open('/home/mnabail/repos/Cylinder3D_spconv_v2/config/label_mapping/nuscenes.yaml', 'r') as stream: # label_mapping configuration file
+with open('./config/label_mapping/nuscenes.yaml', 'r') as stream: # label_mapping configuration file
     label_mapping = yaml.safe_load(stream)
     color_dict = label_mapping['color_map']
 
@@ -81,6 +81,11 @@ for it in sorted(label_dir.iterdir()):
     points_file = points_dir / (str(it.stem) + '.bin')
     label = np.fromfile(label_file, dtype=np.uint32)
     points = np.fromfile(points_file, dtype=np.float32).reshape((-1, 5))[:, 0:3]
+    print("points shape=",points.shape)
+    print("label shape=",label.shape)
+
+
+
     #print(points.shape)
     #print(label.shape, points.shape)
     colorful_points = concate_color(points, label)

@@ -125,7 +125,7 @@ def main(args):
                 labels = np.vectorize(learning_map.__getitem__)(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]])
                 #labels = np.vectorize(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]])
                 labels = labels.astype('uint32')
-                outputPath = save_dir + str(i_iter_demo).zfill(6) + '.label'
+                outputPath = save_dir + str(i_iter_demo).zfill(6) + 'z.label'
                 labels.tofile(outputPath)
                 print("save " + outputPath)
                 #print("\n\n BIN_NAME: ", bin_name, "\n\n")

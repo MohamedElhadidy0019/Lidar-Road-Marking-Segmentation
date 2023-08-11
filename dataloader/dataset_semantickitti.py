@@ -25,7 +25,8 @@ def register_dataset(cls, name=None):
     REGISTERED_DATASET_CLASSES[name] = cls
     return cls
 
-
+#? we want this to resovle to 'dataset_nuscenes.py' the function name: 'cylinder_dataset_nuscenes'
+#? do we ?
 def get_model_class(name):
     global REGISTERED_DATASET_CLASSES
     assert name in REGISTERED_DATASET_CLASSES, f"available class: {REGISTERED_DATASET_CLASSES}"
@@ -139,7 +140,7 @@ def polar2cat(input_xyz_polar):
     y = input_xyz_polar[0] * np.sin(input_xyz_polar[1])
     return np.stack((x, y, input_xyz_polar[2]), axis=0)
 
-
+#? return both points in xyz and voxelized cylinder
 @register_dataset
 class cylinder_dataset(data.Dataset):
     def __init__(self, in_dataset, grid_size, rotate_aug=False, flip_aug=False, ignore_label=255, return_test=False,
@@ -192,9 +193,9 @@ class cylinder_dataset(data.Dataset):
         data = self.point_cloud_dataset[index]
         if len(data) == 2:
             xyz, labels = data
-        elif len(data) == 3:
+        elif len(data) == 3: #! enters here
             xyz, labels, sig = data
-            if len(sig.shape) == 2: sig = np.squeeze(sig)
+            if len(sig.shape) == 2: sig = np.squeeze(sig) #! false
         else:
             raise Exception('Return invalid data tuple')
 
@@ -235,7 +236,7 @@ class cylinder_dataset(data.Dataset):
         min_bound = np.min(xyz_pol[:, 1:], axis=0)
         max_bound = np.concatenate(([max_bound_r], max_bound))
         min_bound = np.concatenate(([min_bound_r], min_bound))
-        if self.fixed_volume_space:
+        if self.fixed_volume_space: #! enters here
             max_bound = np.asarray(self.max_volume_space)
             min_bound = np.asarray(self.min_volume_space)
         # get grid index
@@ -265,12 +266,12 @@ class cylinder_dataset(data.Dataset):
 
         if len(data) == 2:
             return_fea = return_xyz
-        elif len(data) == 3:
+        elif len(data) == 3: #! enters here
             return_fea = np.concatenate((return_xyz, sig[..., np.newaxis]), axis=1)
 
         if self.return_test:
             data_tuple += (grid_ind, labels, return_fea, index)
-        else:
+        else: #! enters here
             data_tuple += (grid_ind, labels, return_fea)
         return data_tuple
 

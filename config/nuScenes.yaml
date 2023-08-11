@@ -44,9 +44,9 @@ train_data_loader:
   data_path: "/data/dataset/nuScenes/"
   imageset: "/data/dataset/nuScenes/nuscenes_infos_train.pkl"
   return_ref: True
-  batch_size: 2
+  batch_size: 1
   shuffle: True
-  num_workers: 4
+  num_workers: 1
 
 val_data_loader:
   data_path: "/data/dataset/nuScenes/"
@@ -54,13 +54,13 @@ val_data_loader:
   return_ref: True
   batch_size: 1
   shuffle: False
-  num_workers: 4
+  num_workers: 1
 
 
 ###################
 ## Train params
 train_params:
-  model_load_path: "./model_load_dir_nuscenes/model_load.pt"
+  model_load_path: "./model_load_dir_nuscenes/model_load_working_inf.pt"
   model_save_path: "./model_save_dir_nuscenes/model_save.pt"
   checkpoint_every_n_steps: 4599
   max_num_epochs: 40

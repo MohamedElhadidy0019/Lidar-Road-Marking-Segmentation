@@ -47,8 +47,8 @@ def concate_color(_points, _label):
 
 # points_dir = Path('/home/ou/Documents/dataset/my_pvrcnn_dataset(gazebo)/kitti/object/training/velodyne') # path to .bin data
 # label_dir = Path('/home/ou/workspace/code/Cylinder3D-master/my_result') # path to .label data
-points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/demo_lidar_input_kitti/') # path to .bin data
-label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/demo_save_kitti/') # path to .label data
+points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/demo_lidar_input_kitti/') # path to .bin data
+label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/demo_save_kitti/') # path to .label data
 
 label_filter = [40, 48, 70, 72]    # object's label which you wan't to show
 # label_filter = []

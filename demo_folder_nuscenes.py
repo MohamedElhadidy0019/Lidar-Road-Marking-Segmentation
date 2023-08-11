@@ -144,7 +144,7 @@ if __name__ == '__main__':
     print(sys.argv[1:])
     # Training settings
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-y', '--config_path', default='config/semantickitti.yaml')
+    parser.add_argument('-y', '--config_path', default='config/nuScenes.yaml')
     #parser.add_argument('-y', '--config_path', default='config/nuScenes.yaml')
     parser.add_argument('--demo-folder', type=str, default='demo_lidar_input/',
                         help='path to the folder containing demo lidar scans',

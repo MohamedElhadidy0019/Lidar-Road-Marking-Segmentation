@@ -21,6 +21,10 @@ def polar2cat(input_xyz_polar):
     return np.stack((x, y, input_xyz_polar[2]), axis=0)
 
 
+
+#? that's it
+#? that's dataset that returns voxelized point cloud
+#! IMPORTANT
 @register_dataset
 class cylinder_dataset_nuscenes(data.Dataset):
     def __init__(self, in_dataset, grid_size, rotate_aug=False, flip_aug=False, ignore_label=0, return_test=False,
@@ -50,9 +54,9 @@ class cylinder_dataset_nuscenes(data.Dataset):
         data = self.point_cloud_dataset[index]
         if len(data) == 2:
             xyz, labels = data
-        elif len(data) == 3:
+        elif len(data) == 3: #! enters here
             xyz, labels, sig = data
-            if len(sig.shape) == 2: sig = np.squeeze(sig)
+            if len(sig.shape) == 2: sig = np.squeeze(sig)#! false here
         else:
             raise Exception('Return invalid data tuple')
 
@@ -93,7 +97,7 @@ class cylinder_dataset_nuscenes(data.Dataset):
         min_bound = np.min(xyz_pol[:, 1:], axis=0)
         max_bound = np.concatenate(([max_bound_r], max_bound))
         min_bound = np.concatenate(([min_bound_r], min_bound))
-        if self.fixed_volume_space:
+        if self.fixed_volume_space: #! enters here
             max_bound = np.asarray(self.max_volume_space)
             min_bound = np.asarray(self.min_volume_space)
         # get grid index
@@ -101,7 +105,7 @@ class cylinder_dataset_nuscenes(data.Dataset):
         cur_grid_size = self.grid_size
         intervals = crop_range / (cur_grid_size - 1)
 
-        if (intervals == 0).any(): print("Zero interval!")
+        if (intervals == 0).any(): print("Zero interval!") #! false
         grid_ind = (np.floor((np.clip(xyz_pol, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
 
         voxel_position = np.zeros(self.grid_size, dtype=np.float32)
@@ -124,13 +128,13 @@ class cylinder_dataset_nuscenes(data.Dataset):
 
         if len(data) == 2:
             return_fea = return_xyz
-        elif len(data) == 3:
+        elif len(data) == 3: #! this is true
             return_fea = np.concatenate((return_xyz, sig[..., np.newaxis]), axis=1)
 
         if self.return_test:
             data_tuple += (grid_ind, labels, return_fea, index)
-        else:
-            data_tuple += (grid_ind, labels, return_fea)
+        else:  #! this is ture
+            data_tuple += (grid_ind, labels, return_fea) #grid_ind and return_fea are used by the model
         return data_tuple
 
 

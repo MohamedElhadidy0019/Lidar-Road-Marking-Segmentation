@@ -1,6 +1,10 @@
 # -*- coding:utf-8 -*-
 # author: Xinge
 
+
+
+#? This file is to generate the mlp point wise feature extractor
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

@@ -1,3 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea
 .DS_Store
+__pycache__/inference_nuscenes.nb_process_label-58.py39.1.nbc
+*.bin
