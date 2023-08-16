@@ -8,7 +8,6 @@ import cv2
 import nthresh
 import open3d as o3d
 import matplotlib.pyplot as plt
-from sklearn.cluster import DBSCAN
 
 
 from config.config import load_config_data
@@ -88,49 +87,9 @@ def custom_draw_geometry_with_key_callback(pcd):
     opt.background_color = np.asarray([0, 0, 0])
     o3d.visualization.draw_geometries_with_key_callbacks([pcd], key_to_callback)
 
-def draw_with_bounding_box(points_to_threshold):
-
-    points_to_draw=points_to_threshold[:,:3]
-    ground_intensity=(points_to_threshold[:,3]/100.0)*255.0
-
-    threshold = nthresh.nthresh(ground_intensity, n_classes=2, bins=255, n_jobs=1)
-    # threshold=45
-
-    binary_intensity=ground_intensity>(threshold[0]+10)
-    land_marking_points=points_to_draw[binary_intensity]
-    # points_to_draw=land_marking_points
-    db = DBSCAN(eps=0.5, min_samples=10).fit(land_marking_points)
 
 
-    labels_db=np.array(db.labels_)
-    n_clusters=np.unique(labels_db).shape[0]
-    bounding_boxes=[]
-    for i in np.unique(labels_db):
-        if(i==-1):
-            continue
-        cluter_points=land_marking_points[labels_db==i]
-        cluster_pc = o3d.geometry.PointCloud()
-        cluster_pc.points = o3d.utility.Vector3dVector(cluter_points)
-        #get bounding box
-        bounding_box=cluster_pc.get_axis_aligned_bounding_box()
-        bounding_box.color = (1, 0, 0)
-        bounding_boxes.append(bounding_box)
-
-
-    visgeom = o3d.visualization.Visualizer()
-    visgeom.create_window()
-    mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])  # create coordinate frame
-    visgeom.add_geometry(mesh_frame)
-    pc=o3d.geometry.PointCloud()
-    pc.points = o3d.utility.Vector3dVector(land_marking_points)
-    pc.paint_uniform_color([0.1, 0.1, 0.9])
-    visgeom.add_geometry(pc)
-    for box in bounding_boxes:
-        visgeom.add_geometry(box)
-    visgeom.run()
-    visgeom.destroy_window()
-
-def ring_local_thresholding(points_to_threshold,vis_bool=False,bin_name=None,points_full=None,labels_full=None):
+def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,bin_name=None,points_full=None,labels_full=None):
 
     list_land_marks_points = []
     np_list_land_marks_points = []
@@ -150,6 +109,7 @@ def ring_local_thresholding(points_to_threshold,vis_bool=False,bin_name=None,poi
             threshold = nthresh.nthresh(intensity, n_classes=2, bins=255, n_jobs=1)
         except:
             continue
+        # get points of intenisty higher than theh threshold, these points are the pavement marking points
         binary_intensity=intensity>(threshold[0]+10)
         land_marking_points=ring_points[binary_intensity]
         if(land_marking_points.shape[0]<2):
@@ -163,37 +123,7 @@ def ring_local_thresholding(points_to_threshold,vis_bool=False,bin_name=None,poi
         np_list_land_marks_points.append(land_marking_points[:,:3])
 
 
-
-        # pc_ring=o3d.geometry.PointCloud()
-        # pc_ring.points = o3d.utility.Vector3dVector(ring_points[:,:3])
-        # pc_ring.paint_uniform_color([0.9, 0.0, 0])
-        # pc_all=o3d.geometry.PointCloud()
-        # temp_points=points_to_threshold[:,:3]+np.array([0,0,-0.5])
-        # pc_all.points = o3d.utility.Vector3dVector(temp_points[:,:3])
-        # pc_all.paint_uniform_color([0.8,0.8, 0.8])
-        # o3d.visualization.draw_geometries([pc_all,pc_ring])
-
-    temp=np.concatenate( np_list_land_marks_points, axis=0 )
-
-
-    # if(vis_bool):
-    #     db = DBSCAN(eps=2, min_samples=5).fit(temp) # makes big bounding box for whole lane
-    #     #db = DBSCAN(eps=5.8, min_samples=15).fit(land_marking_points)
-
-    #     labels_db=np.array(db.labels_)
-    #     n_clusters=np.unique(labels_db).shape[0]
-    #     for i in np.unique(labels_db):
-    #         if(i==-1):
-    #             continue
-    #         cluster_points=temp[labels_db==i]
-    #         cluster_pc = o3d.geometry.PointCloud()
-    #         cluster_pc.points = o3d.utility.Vector3dVector(cluster_points[:,:3])
-    #         #get bounding box
-    #         bounding_box=cluster_pc.get_axis_aligned_bounding_box()
-    #         bounding_box.color = (1, 0, 0)
-    #         bounding_boxes.append(bounding_box)
-
-    if(vis_bool):
+    if(vis_bool or vis_save):
         visgeom = o3d.visualization.Visualizer()
         visgeom.create_window()
         mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])  # create coordinate frame
@@ -216,12 +146,13 @@ def ring_local_thresholding(points_to_threshold,vis_bool=False,bin_name=None,poi
         ctr.set_up([0, 1, 0])
         ctr.set_zoom(0.1)
 
-        visgeom.run()
-        visgeom.destroy_window()
+        if (vis_bool):
+            visgeom.run()
+            visgeom.destroy_window()
 
-
-        # save3DPath='/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/o3d_output_all_nuscenes_ringThreshold/'
-        # visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
+        if (vis_save):
+            save3DPath='./output_thresholded/'
+            visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
 
 
 
@@ -233,8 +164,6 @@ def global_thresholding(points_to_threshold,vis_bool=False,bounding_box=False,bi
     bounding_boxes=[]
     n_rings=32
 
-
-
     intensity=points_to_threshold[:,3]
     intensity=(intensity/100.0)*255.0
     intensity=np.array(intensity,dtype=np.float32)
@@ -243,22 +172,6 @@ def global_thresholding(points_to_threshold,vis_bool=False,bounding_box=False,bi
     land_marking_points=points_to_threshold[binary_intensity]
 
 
-    if(vis_bool and bounding_box):
-        db = DBSCAN(eps=2, min_samples=2).fit(land_marking_points) # makes big bounding box for whole lane
-        #db = DBSCAN(eps=5.8, min_samples=15).fit(land_marking_points)
-
-        labels_db=np.array(db.labels_)
-        n_clusters=np.unique(labels_db).shape[0]
-        for i in np.unique(labels_db):
-            if(i==-1):
-                continue
-            cluster_points=land_marking_points[labels_db==i]
-            cluster_pc = o3d.geometry.PointCloud()
-            cluster_pc.points = o3d.utility.Vector3dVector(cluster_points[:,:3])
-            #get bounding box
-            bounding_box=cluster_pc.get_axis_aligned_bounding_box()
-            bounding_box.color = (1, 0, 0)
-            bounding_boxes.append(bounding_box)
 
     if(vis_bool):
         visgeom = o3d.visualization.Visualizer()
@@ -303,6 +216,8 @@ def global_thresholding(points_to_threshold,vis_bool=False,bounding_box=False,bi
 def draw_grey_scale(ground_points):
     '''
     ground_points: (5*n) numpy array, the ground points only
+
+    description: draws the
     '''
 
     vis_points=ground_points[:,:3]
@@ -323,11 +238,6 @@ def draw_grey_scale(ground_points):
     vis.run()
     vis.destroy_window()
 
-
-# def remove_pc_outliers(points,vis_bool=False,bin_name=None):
-#     '''
-#     points: (5*n) numpy array, the ground points only
-#     '''
 
 def reject_outliers( pc, m = 2.):
 
@@ -354,6 +264,9 @@ def draw_grey_scale_ground_w_whole_scene(ground_points,whole_pc):
     ground_points: (5*n) numpy array, the ground points only
 
     whole_pc: (5*n) numpy array, the whole point cloud
+
+    description:
+        Draws the full point cloud with the background black and the points white accroding to its intensity [0-1]
     '''
 
     # temp=ground_points[ ground_points[:,3]>=0.1  ]
@@ -473,41 +386,7 @@ def radial_thresholding(ground_points,whole_pc,bin_name=None):
     # save3DPath='/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/o3d_output_conti_old/'
     # visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# pc_ring=o3d.geometry.PointCloud()
-# pc_ring.points = o3d.utility.Vector3dVector(land_markings[:,:3]+np.array([0,0,0.5]))
-# pc_ring.paint_uniform_color([0.8,0, 0])
-# pc_all=o3d.geometry.PointCloud()
-# pc_all.points = o3d.utility.Vector3dVector(ring_points[:,:3])
-# pc_all.paint_uniform_color([0.2,0.2, 0.2])
-# visgeom=o3d.visualization.Visualizer()
-# visgeom.create_window()
-# visgeom.add_geometry(pc_ring)
-# visgeom.add_geometry(pc_all)
-# visgeom.run()
-# visgeom.destroy_window()
-
-
-
-
-
-#================================================================================================
-
+    return np_list_land_marks_points
 
 
 def main():
@@ -519,7 +398,7 @@ def main():
         label_mapping = yaml.safe_load(stream)
         color_dict = label_mapping['color_map']
 
-    #print('----------------------------------------------------------------------------------')
+    # rename the label names to be the same as the poincloud name
     for it_scan, it_label in zip(sorted(points_dir.iterdir()), sorted(label_dir.iterdir())):
         bin_name=str(it_scan).split('/')[-1]
         label_name=str(it_label).split('/')[-1]
@@ -536,26 +415,17 @@ def main():
     labels_16 = nuscenesyaml['labels_16']
 
 
-    counter=0
     dataset_config = configs['dataset_params']
     for it in sorted(label_dir.iterdir()):
-        # if(counter<100):
-        #     counter+=1
-        #     continue
 
         label_file = it
         # print("BIN NAME=",str(it.stem))
         points_file = points_dir / (str(it.stem) + '.bin')
         labels = np.fromfile(label_file, dtype=np.uint32)
-        points = np.fromfile(points_file, dtype=np.float32).reshape((-1, 5))[:, 0:3]
 
 
         # x, y, z, inetnsity, ring_index
         points_full = np.fromfile(points_file, dtype=np.float32).reshape((-1, 5))
-        #the fourtch channel
-        intensity = points_full[:, 3]
-        #stack it 3 times
-        intensity_3d = (np.stack([intensity, intensity, intensity], axis=1)/np.max(intensity).astype(np.float32))
 
 
         for i in labels_16:
@@ -565,55 +435,9 @@ def main():
             points_to_threshold=points_full[labels==i]
             points_to_threshold=np.array(points_to_threshold)
             point_name=str(it.stem)
-            print("point_name=",point_name)
+            # print("point_name=",point_name)
 
-
-
-            # save_path='/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/histogram_'
-            # # month=input("month=")
-            # month='old'
-            # save_path=save_path+month
-            # _bins=np.arange(start=0.0, stop=1.0, step=0.001)
-            # plt.ylim([0,1000])
-            # plt.hist(points_to_threshold[:,3], bins =_bins)
-            # #set y limit
-            # plt.title("histogram")
-            # plt.savefig(str(save_path)+'/'+point_name+'.png')
-
-
-
-
-
-
-            # points_to_threshold=reject_outliers(points_to_threshold,m=2)
-
-            # draw_with_bounding_bqqqox(points_to_threshold)
-
-            #draw_grey_scale(points_to_threshold)
-            # draw_grey_scale_ground_w_whole_scene(points_to_threshold,points_full)
-
-            ring_local_thresholding(points_to_threshold,vis_bool=True,bin_name=str(it.stem),points_full=points_full)
-            # global_thresholding(points_to_threshold,vis_bool=True,bounding_box=False ,bin_name=str(it.stem),points_full=points_full)
-
-            # thresholded_points_list=ring_local_thresholding(points_to_threshold,vis_bool=False)
-            # cluster_coplanar_points(thresholded_points_list)
-
-
-
-
-            #radial_thresholding(points_to_threshold,points_full,bin_name=str(it.stem))
-
-
-
-        # counter+=1
-        # break
-
-
-
-
-
-
-
+            ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=True,bin_name=str(it.stem),points_full=points_full)
 
 
 
