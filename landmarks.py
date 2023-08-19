@@ -88,41 +88,48 @@ def custom_draw_geometry_with_key_callback(pcd):
     o3d.visualization.draw_geometries_with_key_callbacks([pcd], key_to_callback)
 
 
-
-def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,bin_name=None,points_full=None,labels_full=None):
-
+import nthresh
+import open3d as o3d
+def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,bin_name=None,points_full=None):
+    '''
+    points_to_threshold: numpy array of shape (n,5) where n is the number of points and 5 is the x,y,z,intensity,ring
+                         these points should be the drivable surface points only
+    vis_bool: boolean to visualize the results
+    vis_save: boolean to save the results
+    bin_name: name of the bin file to save the results
+    points_full: numpy array of shape (n,5) where n is the number of points and 5 is the x,y,z,intensity,ring
+                    these points should be the full point cloud
+    
+    returns :  numpy array of the road marks points           
+    '''
     list_land_marks_points = []
     np_list_land_marks_points = []
     list_return = []
-    bounding_boxes=[]
     n_rings=32
 
+    # get the threshold for each ring
     for i in range(n_rings):
         ring_points=points_to_threshold[points_to_threshold[:,4]==i]
         intensity=ring_points[:,3]
-        # intensity=(intensity/100.0)*255.0
-        # intensity=np.array(intensity,dtype=np.float32)
         if(intensity.shape[0]<2):
             continue
-
         try:
+            # get the threshold for each ring using Otsu's method
             threshold = nthresh.nthresh(intensity, n_classes=2, bins=255, n_jobs=1)
         except:
             continue
-        # get points of intenisty higher than theh threshold, these points are the pavement marking points
+        # get points of intenisty higher than theh threshold, these points are the road marking points
         binary_intensity=intensity>(threshold[0]+10)
         land_marking_points=ring_points[binary_intensity]
         if(land_marking_points.shape[0]<2):
             continue
 
         list_return.append(land_marking_points)
-        pc=o3d.geometry.PointCloud()
-        pc.points = o3d.utility.Vector3dVector(land_marking_points[:,:3])
-        pc.paint_uniform_color([0.9, 0, 0])
         list_land_marks_points.append(pc)
         np_list_land_marks_points.append(land_marking_points[:,:3])
 
 
+    # the following code is to visualize the results using open3d library
     if(vis_bool or vis_save):
         visgeom = o3d.visualization.Visualizer()
         visgeom.create_window()
@@ -153,6 +160,8 @@ def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,b
         if (vis_save):
             save3DPath='./output_thresholded/'
             visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
+
+    return np_list_land_marks_points
 
 
 
