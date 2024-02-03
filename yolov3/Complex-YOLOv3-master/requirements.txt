@@ -1,8 +1,0 @@
-numpy
-torch=1.1
-torchvision
-tensorflow
-terminaltables
-tqdm
-opencv-python
-shapely

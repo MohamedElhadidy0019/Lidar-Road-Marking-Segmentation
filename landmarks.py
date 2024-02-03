@@ -438,7 +438,7 @@ def main():
 
 
         for i in labels_16:
-            if(i!=11):
+            if(i!=11): # 11 is the label of the drivable surface
                 continue
 
             points_to_threshold=points_full[labels==i]
