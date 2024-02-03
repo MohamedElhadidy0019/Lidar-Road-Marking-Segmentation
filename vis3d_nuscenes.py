@@ -49,8 +49,8 @@ def concate_color(_points, _label):
 ################################______MAIN______################################
 
 
-points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/demo_lidar_input/') # path to .bin data
-label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/demosave/') # path to .label data
+points_dir = Path('./demo_lidar_input/') # path to .bin data
+label_dir = Path('./demosave/') # path to .label data
 # points_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/inference_cluster/lidar_pc_val/') # path to .label data
 # label_dir = Path('/home/mnabail/repos/Cylinder3D_spconv_v2/inference_cluster/lidar_labels/') # path to .bin data
 
