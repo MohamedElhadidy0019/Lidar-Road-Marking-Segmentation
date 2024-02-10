@@ -433,18 +433,6 @@ def main():
         new_points.tofile(save_dir / (str(it.stem) + '.bin'))
         # save new_labels_np
         new_labels_np.tofile(save_dir / (str(it.stem) + '.label'))
-        # print('kak')
-        # for i in labels_16:
-        #     if(i!=11): # 11 is the label of the drivable surface
-        #         continue
-
-        #     points_to_threshold=points_full[labels==i]
-        #     points_to_threshold=np.array(points_to_threshold)
-        #     point_name=str(it.stem)
-        #     # print("point_name=",point_name)
-
-        #     ring_local_thresholding(points_to_threshold,vis_bool=True, vis_save=True,bin_name=str(it.stem),points_full=points_full)
-
 
 
 # main
