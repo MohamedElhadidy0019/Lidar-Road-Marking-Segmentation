@@ -125,7 +125,7 @@ def main(args):
                 labels = np.vectorize(learning_map.__getitem__)(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]])
                 #labels = np.vectorize(predict_labels[count, demo_grid[count][:, 0], demo_grid[count][:, 1], demo_grid[count][:, 2]])
                 labels = labels.astype('uint32')
-                outputPath = save_dir + str(i_iter_demo).zfill(6) + 'z.label'
+                outputPath = save_dir + str(i_iter_demo).zfill(6) + '.label'
                 labels.tofile(outputPath)
                 print("save " + outputPath)
                 #print("\n\n BIN_NAME: ", bin_name, "\n\n")
@@ -139,10 +139,10 @@ if __name__ == '__main__':
     # Training settings
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-y', '--config_path', default='config/nuScenes.yaml')
-    parser.add_argument('--demo-folder', type=str, default='demo_lidar_input/',
+    parser.add_argument('--demo-folder', type=str, default='lidar_data/',
                         help='path to the folder containing demo lidar scans',
                         required=False)
-    parser.add_argument('--save-folder', type=str, default = 'demosave/',
+    parser.add_argument('--save-folder', type=str, default = 'lidar_data_labels_all/',
                             help='path to save your result',
                             required=False)
     parser.add_argument('--demo-label-folder', type=str, default='', help='path to the folder containing demo labels')

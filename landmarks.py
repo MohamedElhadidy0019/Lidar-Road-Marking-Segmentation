@@ -125,7 +125,10 @@ def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,b
             continue
 
         list_return.append(land_marking_points)
-        list_land_marks_points.append(pc)
+        pc_land_marks = o3d.geometry.PointCloud()
+        pc_land_marks.points = o3d.utility.Vector3dVector(land_marking_points[:,:3])
+        pc_land_marks.paint_uniform_color([1,0, 0])
+        list_land_marks_points.append(pc_land_marks)
         np_list_land_marks_points.append(land_marking_points[:,:3])
 
 
@@ -151,15 +154,15 @@ def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,b
         ctr.set_front([0, -3, 1])
         ctr.set_lookat([0, 0, 0])
         ctr.set_up([0, 1, 0])
-        ctr.set_zoom(0.1)
+        ctr.set_zoom(0.5)
 
-        if (vis_bool):
-            visgeom.run()
-            visgeom.destroy_window()
+        # if (vis_bool):
+        #     visgeom.run()
+        #     visgeom.destroy_window()
 
-        if (vis_save):
-            save3DPath='./output_thresholded/'
-            visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
+        # if (vis_save):
+        save3DPath='./output_vis_folder/'
+        visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
 
     return np_list_land_marks_points
 
@@ -248,23 +251,6 @@ def draw_grey_scale(ground_points):
     vis.destroy_window()
 
 
-def reject_outliers( pc, m = 2.):
-
-    # mean= (np.mean(pc[:,3])+np.median(pc[:,3]))/2
-    mean= np.mean(pc[:,3])
-    std = np.std(pc[:,3])
-
-    return pc[abs(pc[:,3] - mean) < m * std]
-
-
-    # d=np.abs(pc[:,3]-np.mean(pc[:,3]))
-
-
-    # d = np.abs(data - np.median(data))
-    # mdev = np.median(d)
-    # s = d/mdev if mdev else 0.
-    # return data[s<m]
-
 
 
 
@@ -319,89 +305,93 @@ def draw_grey_scale_ground_w_whole_scene(ground_points,whole_pc):
     vis.run()
     vis.destroy_window()
 
-def cart2polar(input_xyz):
-    rho = np.sqrt(input_xyz[:, 0] ** 2 + input_xyz[:, 1] ** 2)
-    phi = np.arctan2(input_xyz[:, 1], input_xyz[:, 0])
-    return np.stack((rho, phi, input_xyz[:, 2]), axis=1)
-def polar2cat(input_xyz_polar):
-    x = input_xyz_polar[0] * np.cos(input_xyz_polar[1])
-    y = input_xyz_polar[0] * np.sin(input_xyz_polar[1])
-    return np.stack((x, y, input_xyz_polar[2]), axis=0)
-
-
-def radial_thresholding(ground_points,whole_pc,bin_name=None):
+def extract_landmarks( pointlcoud:np.array, labels:np.array, name:str):
     '''
-    ground_points: (5*n) numpy array, the ground points only
+    pointlcoud: (5*n) numpy array, the whole point cloud
 
-    whole_pc: (5*n) numpy array, the whole point cloud
+    labels: (n) numpy array, the labels of the whole point cloud
+
+    description:
+        Extracts the landmarks from the point cloud and returns them as a numpy array
+
+    returns:
+        points_np : same as pointcloud but with different order
+        new_labels_np : label of point 1 -> landmark
+                                       0 -> not landmark
     '''
-    radii=np.sqrt(  np.square(ground_points[:,0]) + np.square(ground_points[:,1])  )
 
-    ground_points_with_radius=np.concatenate([ground_points, np.expand_dims(radii, axis=1)], axis=1)
-    # print('ground_points_with_radius.shape=',ground_points_with_radius.shape)
-    begin=np.min(ground_points_with_radius[:,-1])
-    end=np.max(ground_points_with_radius[:,-1])
 
-    np_list_land_marks_points = []
-    step_size=2.5
-    for i in np.arange(begin,end+10.0,step_size):
-        ring_points=ground_points_with_radius[ground_points_with_radius[:,5]>=i ]
-        ring_points=ring_points[ring_points[:,5]<i+step_size ]
+    drivable_surface_points = pointlcoud[labels==11]
+
+
+    new_labels_list = []
+    points_list = []
+
+    drivable_surface_points = pointlcoud[labels==11]
+
+    n_rings = 32
+
+    for i in range(n_rings):
+        
+        ring_points = drivable_surface_points[drivable_surface_points[:,4]==i]
+        intensity=ring_points[:,3]
+        if(intensity.shape[0]<2):
+            continue
         try:
-            threshold= nthresh.nthresh(ring_points[:,3],  n_classes=2, bins=255, n_jobs=1)
+            # get the threshold for each ring using Otsu's method
+            threshold = nthresh.nthresh(intensity, n_classes=2, bins=255, n_jobs=1)
         except:
             continue
-        # print('threshold=',threshold)
 
-        binary_intensity=(ring_points[:,3]>(threshold[0] + 0.4*threshold[0]))
+        ring_labels = intensity > (threshold[0]+10)
+        # map true and false to 1 and 0
+        ring_labels = ring_labels.astype(np.uint32)
+        new_labels_list.append(ring_labels)
+        points_list.append(ring_points)
+    
+    non_drivable_surface_points = pointlcoud[labels!=11]
+    non_drivable_surface_labels = np.zeros(non_drivable_surface_points.shape[0]).astype(np.uint32)
 
-        land_markings=ring_points[binary_intensity]
+    new_labels_list.append(non_drivable_surface_labels)
+    points_list.append(non_drivable_surface_points)
 
-        np_list_land_marks_points.append(land_markings[:,:3])
-
-    red_pc=[]
-    for ring in np_list_land_marks_points:
-        pc=o3d.geometry.PointCloud()
-        pc.points = o3d.utility.Vector3dVector(ring[:,:3])
-        pc.paint_uniform_color([0.9, 0, 0])
-        red_pc.append(pc)
-
-    pc_ground= o3d.geometry.PointCloud()
-    pc_ground.points = o3d.utility.Vector3dVector(ground_points[:,:3]- np.array([0,0,0.5]))
-    pc_ground.paint_uniform_color([0.2, 0.2, 0.2])
-
-    visgeom=o3d.visualization.Visualizer()
-    visgeom.create_window()
-
-    visgeom.add_geometry(pc_ground)
-    for pc in red_pc:
-        visgeom.add_geometry(pc)
-
-    all_pc= o3d.geometry.PointCloud()
-    all_pc.points = o3d.utility.Vector3dVector(whole_pc[:,:3] - np.array([0,0,0.5]))
-    all_pc.paint_uniform_color([0.2, 0.2, 0.2])
-    visgeom.add_geometry(all_pc)
+    new_labels_np = np.concatenate(new_labels_list).astype(np.uint32)
+    
+    points_np = np.concatenate(points_list)
 
 
-    # ctr = visgeom.get_view_control()
-    # ctr.set_front([0, -3, 1])
-    # ctr.set_lookat([0, 0, 0])
-    # ctr.set_up([0, 1, 0])
-    # ctr.set_zoom(0.08)
-    visgeom.run()
-    visgeom.destroy_window()
+    visualiser = o3d.visualization.Visualizer()
+    visualiser.create_window()
+    mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])  # create coordinate frame
+    visualiser.add_geometry(mesh_frame)
+
+    points_l = points_np[new_labels_np==1]
+    points_o = points_np[new_labels_np==0]
+
+    pcd_l = o3d.geometry.PointCloud()
+    pcd_l.points = o3d.utility.Vector3dVector(points_l[:,:3])
+    pcd_l.paint_uniform_color([1,0, 0])
+
+    pcd_o = o3d.geometry.PointCloud()
+    pcd_o.points = o3d.utility.Vector3dVector(points_o[:,:3])
+    pcd_o.paint_uniform_color([0.8,0.8, 0.8])
+
+    visualiser.add_geometry(pcd_l)
+    visualiser.add_geometry(pcd_o)
+
+    # save
+    save3DPath='./output_vis_folder/'
+    visualiser.capture_screen_image( save3DPath + "/" + name+ ".jpg", do_render=True)
 
 
-    # save3DPath='/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/o3d_output_conti_old/'
-    # visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
-
-    return np_list_land_marks_points
-
+    return points_np, new_labels_np
+    
 
 def main():
 
-    points_dir = Path('./demo_lidar_input/') # path to .bin data
-    label_dir = Path('./demosave/') # path to .label data
+    points_dir = Path('./lidar_data/') # path to .bin data
+    label_dir = Path('./lidar_data_labels_all/') # path to .label data
+    save_dir = Path('./lidar_data_labels_road_marking/') # path to save the results
 
     with open('./config/label_mapping/nuscenes.yaml', 'r') as stream: # label_mapping configuration file
         label_mapping = yaml.safe_load(stream)
@@ -428,25 +418,32 @@ def main():
     for it in sorted(label_dir.iterdir()):
 
         label_file = it
-        # print("BIN NAME=",str(it.stem))
         points_file = points_dir / (str(it.stem) + '.bin')
         labels = np.fromfile(label_file, dtype=np.uint32)
-
 
         # x, y, z, inetnsity, ring_index
         points_full = np.fromfile(points_file, dtype=np.float32).reshape((-1, 5))
 
+        new_points, new_labels_np = extract_landmarks(points_full, labels, str(it.stem))
+        # new_labels_np as int
+        new_labels_np = new_labels_np.astype(np.uint32)
+        # new_labels_np as float
+        # new_labels_np = new_labels_np.astype(np.float32)
+        # save new_points
+        new_points.tofile(save_dir / (str(it.stem) + '.bin'))
+        # save new_labels_np
+        new_labels_np.tofile(save_dir / (str(it.stem) + '.label'))
+        # print('kak')
+        # for i in labels_16:
+        #     if(i!=11): # 11 is the label of the drivable surface
+        #         continue
 
-        for i in labels_16:
-            if(i!=11): # 11 is the label of the drivable surface
-                continue
+        #     points_to_threshold=points_full[labels==i]
+        #     points_to_threshold=np.array(points_to_threshold)
+        #     point_name=str(it.stem)
+        #     # print("point_name=",point_name)
 
-            points_to_threshold=points_full[labels==i]
-            points_to_threshold=np.array(points_to_threshold)
-            point_name=str(it.stem)
-            # print("point_name=",point_name)
-
-            ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=True,bin_name=str(it.stem),points_full=points_full)
+        #     ring_local_thresholding(points_to_threshold,vis_bool=True, vis_save=True,bin_name=str(it.stem),points_full=points_full)
 
 
 
