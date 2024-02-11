@@ -365,20 +365,24 @@ def extract_landmarks( pointlcoud:np.array, labels:np.array, name:str):
     mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])  # create coordinate frame
     visualiser.add_geometry(mesh_frame)
 
-    points_l = points_np[new_labels_np==1]
-    points_o = points_np[new_labels_np==0]
+    points_landmark = points_np[new_labels_np==1]
+    points_other = points_np[new_labels_np==0]
 
     pcd_l = o3d.geometry.PointCloud()
-    pcd_l.points = o3d.utility.Vector3dVector(points_l[:,:3])
+    pcd_l.points = o3d.utility.Vector3dVector(points_landmark[:,:3])
     pcd_l.paint_uniform_color([1,0, 0])
 
     pcd_o = o3d.geometry.PointCloud()
-    pcd_o.points = o3d.utility.Vector3dVector(points_o[:,:3])
+    pcd_o.points = o3d.utility.Vector3dVector(points_other[:,:3])
     pcd_o.paint_uniform_color([0.8,0.8, 0.8])
 
     visualiser.add_geometry(pcd_l)
     visualiser.add_geometry(pcd_o)
-
+    ctr = visualiser.get_view_control()
+    ctr.set_front([0, -3, 1])
+    ctr.set_lookat([0, 0, 0])
+    ctr.set_up([0, 1, 0])
+    ctr.set_zoom(0.1)
     # save
     save3DPath='./output_vis_folder/'
     visualiser.capture_screen_image( save3DPath + "/" + name+ ".jpg", do_render=True)
@@ -405,16 +409,6 @@ def main():
         new_name=str(label_dir)+'/'+bin_name[:-4]+'.label'
         os.rename(old_name,new_name)
 
-
-    config_path='config/nuScenes.yaml'
-    configs = load_config_data(config_path)
-    dataset_config = configs['dataset_params']
-    with open(dataset_config["label_mapping"], 'r') as stream:
-        nuscenesyaml = yaml.safe_load(stream)
-    labels_16 = nuscenesyaml['labels_16']
-
-
-    dataset_config = configs['dataset_params']
     for it in sorted(label_dir.iterdir()):
 
         label_file = it
