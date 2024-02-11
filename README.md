@@ -9,6 +9,8 @@
 
 #### Model weights link: https://drive.google.com/file/d/1mCXL2INlabwm7ExOvhgponQUBQNM6HKf/view?usp=sharing
 
+#### Medium Article Explaining the pipeline: to be added
+
 ## Data in folders
 - `lidar_data/` put in it the raw lidar bins of nuscenes having structure of (x,y,z,intensity,ring), so each bin have size of N x 5, where N is the number of points in the lidar scan.
 - `model_load_dir_nuscenes/` put in the weights of the trained model, name must be `model_weight.pt` ,  you can change the path though from `config/nuScenes.yaml` 
@@ -18,13 +20,12 @@
 ## How to run the code
 - install requirements `conda create --name <env> --file environment.yml`
 - `conda activate <env>`
-- run  `python inference_nuscenes.py` to invoke cylinderical 3d model, labels will be saved in `lidar_data_labels_all/` folder
-- run `python landmarks.py`, pointcloud and its labels will be saved in `lidar_data_labels_road_marking/` and visualisation images will be saved in `output_vis_folder/`
+- run  `python inference_nuscenes.py` to invoke cylinderical 3d model, labels will be saved in ***lidar_data_labels_all/***  folder
+- run `python landmarks.py`, pointcloud and its labels will be saved in ***lidar_data_labels_road_marking/*** and visualisation images will be saved in ***output_vis_folder/***
 
 
 
 <!-- add gif -->
-
 ### End result (red is road marking)
 ![Alt Text](all_output/output.gif)
 
