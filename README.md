@@ -9,7 +9,7 @@
 
 #### Model weights link: https://drive.google.com/file/d/1mCXL2INlabwm7ExOvhgponQUBQNM6HKf/view?usp=sharing
 
-#### Medium Article Explaining the pipeline: to be added
+#### Medium Article Explaining the pipeline: https://mohamedelbassiouny.medium.com/lidar-road-marking-segmentation-d4d7cd437808
 
 ## Data in folders
 - `lidar_data/` put in it the raw lidar bins of nuscenes having structure of (x,y,z,intensity,ring), so each bin have size of N x 5, where N is the number of points in the lidar scan.
