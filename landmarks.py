@@ -8,86 +8,6 @@ import cv2
 import nthresh
 import open3d as o3d
 import matplotlib.pyplot as plt
-
-
-from config.config import load_config_data
-
-
-def get_rgb_list(_label):
-
-    # c = color_dict[_label]
-    if(_label):
-        c = [255,0,0]
-    else:
-        c = [0,0,0]
-
-    return np.array((c[0], c[1], c[2]))
-
-
-def draw_pc(pc_xyzrgb):
-    pc = open3d.geometry.PointCloud()
-    pc.points = open3d.utility.Vector3dVector(pc_xyzrgb[:, 0:3])
-    pc.colors = open3d.utility.Vector3dVector(pc_xyzrgb[:, 3:6] / 255.)
-
-    def custom_draw_geometry_with_key_callback(pcd):
-        def change_background_to_black(vis):
-            opt = vis.get_render_option()
-            opt.background_color = np.asarray([0, 0, 0])
-            opt.point_size = 1
-            return False
-
-        key_to_callback = {}
-        key_to_callback[ord("K")] = change_background_to_black
-        open3d.visualization.draw_geometries_with_key_callbacks([pcd], key_to_callback)
-
-    custom_draw_geometry_with_key_callback(pc)
-
-
-def concate_color(_points, _label):
-    color = np.zeros((_points.shape[0], 3))
-    label_id = np.unique(_label)
-    label_filter = [40, 48, 70, 72]    # object's label which you wan't to show
-    # print(label_id)
-    # print('---------------------------------------------')
-    pass
-    for cls in label_id:
-        if label_filter.__len__() == 0:
-            color[_label == cls] = get_rgb_list(cls)
-        elif label_filter.count(cls) == 0:
-            color[_label == cls] = get_rgb_list(cls) # kol el 7agat ely leha el label bta3 l unique label cls , ta5d el loon bta3ha
-    _points = np.concatenate([_points, color], axis=1)
-    return _points
-
-def custom_draw_geometry_with_key_callback(pcd):
-
-    def change_background_to_black(vis):
-        opt = vis.get_render_option()
-        opt.background_color = np.asarray([0, 0, 0])
-        return False
-
-
-    def capture_depth(vis):
-        depth = vis.capture_depth_float_buffer()
-        plt.imshow(np.asarray(depth))
-        plt.show()
-        return False
-
-    def capture_image(vis):
-        image = vis.capture_screen_float_buffer()
-        plt.imshow(np.asarray(image))
-        plt.show()
-        return False
-
-    key_to_callback = {}
-    key_to_callback[ord("K")] = change_background_to_black
-    key_to_callback[ord(",")] = capture_depth
-    key_to_callback[ord(".")] = capture_image
-
-    opt = o3d.vis.get_render_option()
-    opt.background_color = np.asarray([0, 0, 0])
-    o3d.visualization.draw_geometries_with_key_callbacks([pcd], key_to_callback)
-
-
 import nthresh
 import open3d as o3d
 def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,bin_name=None,points_full=None):
@@ -165,64 +85,6 @@ def ring_local_thresholding(points_to_threshold,vis_bool=False, vis_save=False,b
         visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
 
     return np_list_land_marks_points
-
-
-
-def global_thresholding(points_to_threshold,vis_bool=False,bounding_box=False,bin_name=None,points_full=None,labels_full=None):
-
-    list_land_marks_points = []
-    np_list_land_marks_points = []
-    list_return = []
-    bounding_boxes=[]
-    n_rings=32
-
-    intensity=points_to_threshold[:,3]
-    intensity=(intensity/100.0)*255.0
-    intensity=np.array(intensity,dtype=np.float32)
-    threshold = nthresh.nthresh(intensity, n_classes=2, bins=255, n_jobs=1)
-    binary_intensity=intensity>(threshold[0])
-    land_marking_points=points_to_threshold[binary_intensity]
-
-
-
-    if(vis_bool):
-        visgeom = o3d.visualization.Visualizer()
-        visgeom.create_window()
-        mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])  # create coordinate frame
-        visgeom.add_geometry(mesh_frame)
-        if(bounding_box):
-            for box in bounding_boxes:
-                visgeom.add_geometry(box)
-        points_full=points_full[:,:3]+np.array([0,0,-0.5])
-        pc_full=o3d.geometry.PointCloud()
-        pc_full.points = o3d.utility.Vector3dVector(points_full[:,:3])
-        pc_full.paint_uniform_color([0.8,0.8, 0.8])
-        visgeom.add_geometry(pc_full)
-
-        land_marking_pc=o3d.geometry.PointCloud()
-        land_markings_xyz=land_marking_points[:,:3]+np.array([0,0,-0.5])
-        land_marking_pc.points = o3d.utility.Vector3dVector(land_markings_xyz)
-        land_marking_pc.paint_uniform_color([1,0, 0])
-
-        visgeom.add_geometry(land_marking_pc)
-
-
-
-        #camera
-        ctr = visgeom.get_view_control()
-        ctr.set_front([0, -3, 1])
-        ctr.set_lookat([0, 0, 0])
-        ctr.set_up([0, 1, 0])
-        ctr.set_zoom(0.04)
-
-        visgeom.run()
-        visgeom.destroy_window()
-
-
-        # save3DPath='/home/mnabail/repos/Cylinder3D_spconv_v2_LANDMARKINGS/o3d_output_conti_old/'
-        # visgeom.capture_screen_image( save3DPath + "/" + str(bin_name)+ ".jpg", do_render=True)
-
-
 
 
 def draw_grey_scale(ground_points):
@@ -320,35 +182,41 @@ def extract_landmarks( pointlcoud:np.array, labels:np.array, name:str):
                                        0 -> not landmark
     '''
 
-
+    # 11 is the label of the drivable surface
     drivable_surface_points = pointlcoud[labels==11]
 
 
-    new_labels_list = []
-    points_list = []
+    new_labels_list = [] # list of the labels of the points
+    points_list = [] # list of the points in the same order as the new labels
 
     drivable_surface_points = pointlcoud[labels==11]
 
-    n_rings = 32
+    n_rings = 32  # 32 as nuscenes lidar have 32 laser stacked vertically
 
     for i in range(n_rings):
         
+        # get the points of each ring
         ring_points = drivable_surface_points[drivable_surface_points[:,4]==i]
         intensity=ring_points[:,3]
+
+        
         if(intensity.shape[0]<2):
             continue
         try:
             # get the threshold for each ring using Otsu's method
+            #the threshold is the intensity value that separates the road marking points from the other points
             threshold = nthresh.nthresh(intensity, n_classes=2, bins=255, n_jobs=1)
         except:
             continue
 
+        # intensity above the threshold are the road marking points
         ring_labels = intensity > (threshold[0]+10)
-        # map true and false to 1 and 0
+    
         ring_labels = ring_labels.astype(np.uint32)
         new_labels_list.append(ring_labels)
         points_list.append(ring_points)
     
+    # get the non drivable surface points to add to the list of the new pcd
     non_drivable_surface_points = pointlcoud[labels!=11]
     non_drivable_surface_labels = np.zeros(non_drivable_surface_points.shape[0]).astype(np.uint32)
 
@@ -356,10 +224,9 @@ def extract_landmarks( pointlcoud:np.array, labels:np.array, name:str):
     points_list.append(non_drivable_surface_points)
 
     new_labels_np = np.concatenate(new_labels_list).astype(np.uint32)
-    
     points_np = np.concatenate(points_list)
 
-
+    # Visualisation part using open3d library
     visualiser = o3d.visualization.Visualizer()
     visualiser.create_window()
     mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])  # create coordinate frame
@@ -386,7 +253,6 @@ def extract_landmarks( pointlcoud:np.array, labels:np.array, name:str):
     # save
     save3DPath='./output_vis_folder/'
     visualiser.capture_screen_image( save3DPath + "/" + name+ ".jpg", do_render=True)
-
 
     return points_np, new_labels_np
     
