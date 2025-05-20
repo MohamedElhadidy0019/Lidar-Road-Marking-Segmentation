@@ -7,7 +7,7 @@
 #### we trained the cylindircal 3d model on nuscenes, intially it was trained only on KITTI.
 #### Our approach is tested on nuscenes dataset only as it is the one that have the drivable surface labels
 
-#### Model weights link: https://drive.google.com/file/d/1mCXL2INlabwm7ExOvhgponQUBQNM6HKf/view?usp=sharing
+#### Model weights link: https://drive.google.com/file/d/1mZl9nSiXU55fpSDFOyP-jhqRzHmW2Was/view?usp=sharing
 
 #### Medium Article Explaining the pipeline: https://mohamedelbassiouny.medium.com/lidar-road-marking-segmentation-d4d7cd437808
 
